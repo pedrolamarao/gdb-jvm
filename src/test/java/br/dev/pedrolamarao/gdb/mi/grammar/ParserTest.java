@@ -3,6 +3,7 @@ package br.dev.pedrolamarao.gdb.mi.grammar;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.hamcrest.Matcher;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,6 +39,523 @@ public class ParserTest
 			final var tree = parser.output();
 			assertFalse(error.get());
 			assertThat(tree, matchesTree);
+		}
+	}
+
+	@Test
+	public void parseConversation () throws IOException
+	{
+		final var error = new ErrorListener();
+
+		try (var stream = getClass().getResourceAsStream("/foo"))
+		{
+			assumeTrue(stream != null);
+
+			final var lexer = new GdbMiGrammarLexer(CharStreams.fromStream(stream));
+			lexer.addErrorListener(error);
+
+			final var parser = new GdbMiGrammarParser(new CommonTokenStream(lexer));
+			parser.addErrorListener(error);
+
+			GdbMiGrammarParser.OutputContext tree;
+
+			// 1
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 2
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 3
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.ExecAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 4
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 5
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.ExecAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 6
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.ExecAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 7
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 8
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.ExecAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 9
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.ExecAsyncRecordContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
+
+			// 10
+
+			tree = parser.output();
+			assertFalse(error.get());
+			assertThat(
+				tree,
+				matchesTree(
+					GdbMiGrammarParser.OutputContext.class,
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.LogStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.AsyncRecordContext.class,
+							instanceOf(GdbMiGrammarParser.NotifyAsyncRecordContext.class)
+						)
+					),
+					matchesTree(
+						GdbMiGrammarParser.OutOfBandContext.class,
+						matchesTree(
+							GdbMiGrammarParser.StreamOutputContext.class,
+							instanceOf(GdbMiGrammarParser.ConsoleStreamOutputContext.class)
+						)
+					),
+					instanceOf(GdbMiGrammarParser.ResultRecordContext.class),
+					instanceOf(GdbMiGrammarParser.GdbContext.class)
+				)
+			);
 		}
 	}
 
