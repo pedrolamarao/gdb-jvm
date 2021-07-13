@@ -72,6 +72,10 @@ public class GdbMiParserTest
             read.value.get("argh", GdbMiProperties.class).get("long", String.class),
             equalTo("hello world")
         );
+
+        reader = new StringReader("original-location=\"main\"");
+        read = GdbMiReader.readProperties(reader);
+        assertThat(read.value.get("original-location", String.class), equalTo("main"));
     }
 
     @Test

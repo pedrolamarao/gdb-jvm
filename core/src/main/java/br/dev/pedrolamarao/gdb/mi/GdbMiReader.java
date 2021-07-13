@@ -216,7 +216,7 @@ public class GdbMiReader
     {
         final var builder = new StringBuilder();
 
-        while (Character.isAlphabetic(token))
+        while (Character.isAlphabetic(token) || token == '-')
         {
             builder.append((char) token);
             token = reader.read();
