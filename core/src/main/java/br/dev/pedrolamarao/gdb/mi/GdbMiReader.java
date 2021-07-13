@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -153,7 +154,7 @@ public class GdbMiReader
     {
         final var properties = new HashMap<String, Object>();
 
-        int token = -1;
+        int token;
 
         do
         {
@@ -173,6 +174,23 @@ public class GdbMiReader
         return new Read<>(token, new GdbMiProperties(properties));
     }
 
+    public static Read<GdbMiList> readPropertyValues (Reader reader) throws IOException
+    {
+        final var list = new ArrayList<>();
+
+        int token;
+
+        do
+        {
+            final var value = readPropertyValue(reader);
+            token = value.next;
+            list.add(value.value);
+        }
+        while (token == ',');
+
+        return new Read<>(token, new GdbMiList(list));
+    }
+
     public static Read<Object> readPropertyValue (Reader reader) throws IOException
     {
         int token = reader.read();
@@ -187,6 +205,13 @@ public class GdbMiReader
             if (token != '}') raiseUnexpected(token, '}');
             token = reader.read();
             return new Read<>(token, properties.value);
+        case '[':
+            final var list = readPropertyValues(reader);
+            token = list.next;
+            if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-value");
+            if (token != ']') raiseUnexpected(token, ']');
+            token = reader.read();
+            return new Read<>(token, list.value);
         case '"':
             final var quotedString = readFinishQuotedString(token, reader);
             return new Read<>(quotedString.next, quotedString.value);

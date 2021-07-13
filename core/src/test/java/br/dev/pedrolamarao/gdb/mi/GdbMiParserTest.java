@@ -76,6 +76,15 @@ public class GdbMiParserTest
         reader = new StringReader("original-location=\"main\"");
         read = GdbMiReader.readProperties(reader);
         assertThat(read.value.get("original-location", String.class), equalTo("main"));
+
+        reader = new StringReader("bkpt={number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"0x00007ff68f121538\",at=\"<main+8>\",thread-groups=[\"i1\"],times=\"1\",original-location=\"-qualified main\"}");
+        read = GdbMiReader.readProperties(reader);
+        assertThat(
+            read.value.get("bkpt", GdbMiProperties.class)
+                .get("thread-groups", GdbMiList.class)
+                .get(0, String.class),
+            equalTo("i1")
+        );
     }
 
     @Test
