@@ -1,13 +1,15 @@
 package br.dev.pedrolamarao.gdb.mi;
 
-import br.dev.pedrolamarao.gdb.GdbProcess;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
@@ -22,24 +24,25 @@ public class GdbMiInteroperabilityTest
     @DisplayName("start, quit")
     public void startQuit () throws Exception
     {
-        final var process = GdbProcess.builder()
-            .command(path)
-            .interpreter("mi")
+        final var process = new ProcessBuilder()
+            .command(path, "--interpreter=mi")
             .start();
 
         try
         {
-            process.write( GdbMiWriter.quit().context(123) );
+            final var writer = new OutputStreamWriter(process.getOutputStream(), UTF_8);
+            GdbMiWriter.quit().context(123).write(writer).flush();
+
+            final var reader = GdbMiReader.fromStream(process.getInputStream(), StandardCharsets.UTF_8);
 
             assertTimeout(
                 Duration.ofSeconds(10),
                 () ->
                 {
                     while (true) {
-                        final var message = process.read();
+                        final var message = reader.read();
                         if (message == null)
                             break;
-                        System.err.println(message);
                     }
                 }
             );

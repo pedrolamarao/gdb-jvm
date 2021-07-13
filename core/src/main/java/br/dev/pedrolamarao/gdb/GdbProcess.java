@@ -25,9 +25,9 @@ public class GdbProcess
         this.writer = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
     }
 
-    public static GdbProcessBuilder builder ()
+    public static Builder builder ()
     {
-        return new GdbProcessBuilder();
+        return new Builder();
     }
 
     public void destroy ()
@@ -60,5 +60,26 @@ public class GdbProcess
     {
         message.write(this.writer).flush();
         return this;
+    }
+
+    public static class Builder
+    {
+        private String command = "gdb";
+
+        Builder () { }
+
+        public Builder command (String path)
+        {
+            command = path;
+            return this;
+        }
+
+        public GdbProcess start () throws IOException
+        {
+            final var builder = new ProcessBuilder();
+            builder.command(command, "--interpreter=mi");
+            final var process = builder.start();
+            return new GdbProcess(process);
+        }
     }
 }
