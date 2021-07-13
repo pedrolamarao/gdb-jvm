@@ -75,6 +75,14 @@ public class GdbMiParserTest
     }
 
     @Test
+    public void readQuotedString () throws IOException
+    {
+        var reader = new StringReader("\"No symbol table is loaded.  Use the \\\"file\\\" command.\"");
+        var read = GdbMiReader.readFinishQuotedString(reader.read(), reader);
+        assertThat(read.value, equalTo("No symbol table is loaded.  Use the \"file\" command."));
+    }
+
+    @Test
     public void readRecord () throws IOException
     {
         final var type = GdbMiType.Notify;

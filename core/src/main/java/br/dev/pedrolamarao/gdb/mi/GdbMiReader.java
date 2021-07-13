@@ -234,10 +234,14 @@ public class GdbMiReader
 
         while (token != '"')
         {
+            if (token == '\\') {
+                token = reader.read();
+                if (token == -1) throw new RuntimeException("unexpected end-of-stream in escape-sequence");
+            }
+
             builder.append((char) token);
             token = reader.read();
-            if (token == -1) return new Read<>(token, null);
-            if (token == '\n') throw new RuntimeException("unexpected new-line in quoted-string");
+            if (token == -1) throw new RuntimeException("unexpected end-of-stream in quoted-string");
         }
 
         token = reader.read();
