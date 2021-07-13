@@ -34,18 +34,28 @@ public class GdbMiParserTest
     }
 
     @Test
+    public void readMessage () throws IOException
+    {
+        var reader = new StringReader("123*event,foo=bar,meh={duh=\"hello world\"}\n");
+        var read = GdbMiReader.fromReader(reader).read();
+        assertThat(read, notNullValue());
+        assertThat(read.type(), equalTo(GdbMiType.Execute));
+        assertThat(read.context(), equalTo(123));
+    }
+
+    @Test
     public void readProperties () throws IOException
     {
         var reader = new StringReader("foo=bar");
         var read = GdbMiReader.readProperties(reader);
         assertThat(read, notNullValue());
-        assertThat(read.token, equalTo(-1));
+        assertThat(read.next, equalTo(-1));
         assertThat(read.value.get("foo", String.class), equalTo("bar"));
 
         reader = new StringReader("foo=bar,long=\"hello world\",meh=duh");
         read = GdbMiReader.readProperties(reader);
         assertThat(read, notNullValue());
-        assertThat(read.token, equalTo(-1));
+        assertThat(read.next, equalTo(-1));
         assertThat(read.value.get("foo", String.class), equalTo("bar"));
         assertThat(read.value.get("long", String.class), equalTo("hello world"));
         assertThat(read.value.get("meh", String.class), equalTo("duh"));
@@ -69,7 +79,7 @@ public class GdbMiParserTest
     {
         final var type = GdbMiType.Notify;
         var reader = new StringReader("event,foo=bar,long=\"hello world\",meh=duh");
-        var read = readFinishRecordMessage(type, reader);
+        var read = readFinishRecordMessage(type, null, reader);
         assertThat(read, notNullValue());
         assertThat(read.content().type(), equalTo("event"));
         assertThat(read.content().properties().get("foo", String.class), equalTo("bar"));
@@ -82,11 +92,11 @@ public class GdbMiParserTest
     {
         var read = GdbMiReader.readString(new StringReader("abcd,"));
         assertThat(read.value, equalTo("abcd"));
-        assertThat((char) read.token, equalTo(','));
+        assertThat((char) read.next, equalTo(','));
 
         read = GdbMiReader.readString(new StringReader("\"ab 123-cd\","));
         assertThat(read.value, equalTo("ab 123-cd"));
-        assertThat((char) read.token, equalTo(','));
+        assertThat((char) read.next, equalTo(','));
     }
 
     @Test
@@ -94,7 +104,7 @@ public class GdbMiParserTest
     {
         var type = GdbMiType.Log;
         var reader = new StringReader("\"long text message\"\n");
-        var read = GdbMiReader.readFinishStringMessage(type, reader);
+        var read = GdbMiReader.readFinishStringMessage(type, null, reader);
         assertThat(read, notNullValue());
         assertThat(read.content(), equalTo("long text message"));
     }

@@ -38,39 +38,40 @@ public class GdbMiReader
 
     static final class Read<T>
     {
-        final int token;
+        final int next;
         final T value;
 
         public Read (int token, T foo)
         {
-            this.token = token;
+            this.next = token;
             this.value = foo;
         }
 
-        @Override public String toString () { return String.format("token = %s, value = %s", token, value); }
+        @Override public String toString () { return String.format("next = %s, value = %s", next, value); }
     }
 
     public static GdbMiMessage readMessage (Reader reader) throws IOException
     {
-        final var token = reader.read();
+        final Read<Integer> context = readContext(reader);
+        final int token = context.next;
         if (token == -1) return null;
 
-        switch (token)
+        switch (context.next)
         {
             case '~':
-                return readFinishStringMessage(GdbMiType.Console, reader);
+                return readFinishStringMessage(GdbMiType.Console, context.value, reader);
             case '@':
-                return readFinishStringMessage(GdbMiType.Target, reader);
+                return readFinishStringMessage(GdbMiType.Target, context.value, reader);
             case '&':
-                return readFinishStringMessage(GdbMiType.Log, reader);
+                return readFinishStringMessage(GdbMiType.Log, context.value, reader);
             case '*':
-                return readFinishRecordMessage(GdbMiType.Execute, reader);
+                return readFinishRecordMessage(GdbMiType.Execute, context.value, reader);
             case '=':
-                return readFinishRecordMessage(GdbMiType.Notify, reader);
+                return readFinishRecordMessage(GdbMiType.Notify, context.value, reader);
             case '+':
-                return readFinishRecordMessage(GdbMiType.Status, reader);
+                return readFinishRecordMessage(GdbMiType.Status, context.value, reader);
             case '^':
-                return readFinishRecordMessage(GdbMiType.Result, reader);
+                return readFinishRecordMessage(GdbMiType.Result, context.value, reader);
             case '(':
                 return readFinishPrompt(token, reader);
             default:
@@ -78,28 +79,28 @@ public class GdbMiReader
         }
     }
 
-    static GdbMiMessage.StringMessage readFinishStringMessage (GdbMiType type, Reader reader) throws IOException
+    static GdbMiMessage.StringMessage readFinishStringMessage (GdbMiType type, Integer context, Reader reader) throws IOException
     {
         final var string = readString(reader);
-        int token = string.token;
+        int token = string.next;
 
         while (token != -1 && token != '\n') {
             token = reader.read();
         }
 
-        return GdbMiMessage.string(type, string.value);
+        return GdbMiMessage.string(type, context, string.value);
     }
 
-    static GdbMiMessage.RecordMessage readFinishRecordMessage (GdbMiType type, Reader reader) throws IOException
+    static GdbMiMessage.RecordMessage readFinishRecordMessage (GdbMiType type, Integer context, Reader reader) throws IOException
     {
         final var record = readRecord(reader);
-        int token = record.token;
+        int token = record.next;
 
         while (token != -1 && token != '\n') {
             token = reader.read();
         }
 
-        return GdbMiMessage.record(type, record.value);
+        return GdbMiMessage.record(type, context, record.value);
     }
 
     public static GdbMiMessage.StringMessage readFinishPrompt (int token, Reader reader) throws IOException
@@ -116,18 +117,34 @@ public class GdbMiReader
             token = reader.read();
         }
 
-        return GdbMiMessage.string(GdbMiType.Prompt, "");
+        return GdbMiMessage.string(GdbMiType.Prompt, null, "");
+    }
+
+    public static Read<Integer> readContext (Reader reader) throws IOException
+    {
+        int token = reader.read();
+        if (token == -1) return new Read<>(token, null);
+        if (! Character.isDigit(token)) return new Read<>(token, null);
+
+        final var builder = new StringBuilder();
+        do {
+            builder.append((char) token);
+            token = reader.read();
+        }
+        while (Character.isDigit(token));
+
+        return new Read<>(token, Integer.parseInt( builder.toString() ));
     }
 
     public static Read<GdbMiRecord> readRecord (Reader reader) throws IOException
     {
         final var type = readSimpleString(reader);
-        int token = type.token;
+        int token = type.next;
         if (token == -1) return null;
 
         final Read<GdbMiProperties> properties =
             (token == ',') ? readProperties(reader) : new Read<>(0, new GdbMiProperties());
-        token = properties.token;
+        token = properties.next;
 
         return new Read<>(token, new GdbMiRecord(type.value, properties.value));
     }
@@ -141,13 +158,13 @@ public class GdbMiReader
         do
         {
             final var name = readSimpleString(reader);
-            token = name.token;
+            token = name.next;
             if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-name");
 
             if (token != '=') raiseUnexpected(token, '=');
 
             final var value = readPropertyValue(reader);
-            token = value.token;
+            token = value.next;
 
             properties.put(name.value, value.value);
         }
@@ -165,17 +182,17 @@ public class GdbMiReader
         {
         case '{':
             final var properties = readProperties(reader);
-            token = properties.token;
+            token = properties.next;
             if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-value");
             if (token != '}') raiseUnexpected(token, '}');
             token = reader.read();
             return new Read<>(token, properties.value);
         case '"':
             final var quotedString = readFinishQuotedString(token, reader);
-            return new Read<>(quotedString.token, quotedString.value);
+            return new Read<>(quotedString.next, quotedString.value);
         default:
             final var string = readFinishSimpleString(token, reader);
-            return new Read<>(string.token, string.value);
+            return new Read<>(string.next, string.value);
         }
     }
 

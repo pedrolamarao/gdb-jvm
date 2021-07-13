@@ -1,5 +1,6 @@
 package br.dev.pedrolamarao.gdb.mi;
 
+import br.dev.pedrolamarao.gdb.GdbProcess;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,23 +20,21 @@ public class GdbMiInteroperabilityTest
     @DisplayName("start, quit")
     public void startQuit () throws Exception
     {
-        final var builder = new ProcessBuilder();
-        builder.command(path, "--interpreter=mi");
-
-        final var process = builder.start();
+        final var process = GdbProcess.builder()
+            .command(path)
+            .interpreter("mi")
+            .start();
 
         try
         {
-            GdbMiWriter.quit().write(process.getOutputStream(), UTF_8);
-
-            final var reader = GdbMiReader.fromStream(process.getInputStream(), UTF_8);
+            process.write( GdbMiWriter.quit().context(123) );
 
             assertTimeout(
                 Duration.ofSeconds(10),
                 () ->
                 {
                     while (true) {
-                        final var message = reader.read();
+                        final var message = process.read();
                         if (message == null)
                             break;
                         System.err.println(message);

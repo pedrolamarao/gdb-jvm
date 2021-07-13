@@ -12,6 +12,14 @@ public abstract class GdbMiMessage
     }
 
     /**
+     * Property: message context.
+     *
+     * @return value
+     */
+
+    public abstract Integer context ();
+
+    /**
      * Property: message type.
      *
      * @return value
@@ -25,20 +33,26 @@ public abstract class GdbMiMessage
 
     public static final class StringMessage extends GdbMiMessage
     {
-        final GdbMiType type;
-
         final String content;
 
-        StringMessage (GdbMiType type, String content)
+        final Integer context;
+
+        final GdbMiType type;
+
+        StringMessage (String content, Integer context, GdbMiType type)
         {
-            this.type = type;
             this.content = content;
+            this.context = context;
+            this.type = type;
         }
 
         public String content ()
         {
             return content;
         }
+
+        @Override
+        public Integer context () { return context; }
 
         @Override
         public GdbMiType type ()
@@ -55,9 +69,9 @@ public abstract class GdbMiMessage
      * @return         new message
      */
 
-    public static StringMessage string (GdbMiType type, String content)
+    public static StringMessage string (GdbMiType type, Integer context, String content)
     {
-        return new StringMessage(type, content);
+        return new StringMessage(content, context, type);
     }
 
     /**
@@ -66,20 +80,26 @@ public abstract class GdbMiMessage
 
     public static final class RecordMessage extends GdbMiMessage
     {
-        final GdbMiType type;
-
         final GdbMiRecord content;
 
-        RecordMessage (GdbMiType type, GdbMiRecord content)
+        final Integer context;
+
+        final GdbMiType type;
+
+        RecordMessage (GdbMiRecord content, Integer context, GdbMiType type)
         {
-            this.type = type;
             this.content = content;
+            this.context = context;
+            this.type = type;
         }
 
         public GdbMiRecord content ()
         {
             return content;
         }
+
+        @Override
+        public Integer context () { return context; }
 
         @Override
         public GdbMiType type ()
@@ -95,8 +115,8 @@ public abstract class GdbMiMessage
      * @param content  message content
      * @return         new message
      */
-    public static RecordMessage record (GdbMiType type, GdbMiRecord content)
+    public static RecordMessage record (GdbMiType type, Integer context, GdbMiRecord content)
     {
-        return new RecordMessage(type, content);
+        return new RecordMessage(content, context, type);
     }
 }
