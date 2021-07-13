@@ -5,10 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
+
+/**
+ * GDB/MI message reader.
+ */
 
 public class GdbMiReader
 {
@@ -37,7 +39,6 @@ public class GdbMiReader
     static final class Read<T>
     {
         final int token;
-
         final T value;
 
         public Read (int token, T foo)
@@ -45,6 +46,8 @@ public class GdbMiReader
             this.token = token;
             this.value = foo;
         }
+
+        @Override public String toString () { return String.format("token = %s, value = %s", token, value); }
     }
 
     public static GdbMiMessage readMessage (Reader reader) throws IOException
@@ -71,42 +74,32 @@ public class GdbMiReader
             case '(':
                 return readFinishPrompt(token, reader);
             default:
-                throw new RuntimeException("unexpected token");
+                throw new RuntimeException("unexpected token in message-type: " + (char) token);
         }
     }
 
     static GdbMiMessage.StringMessage readFinishStringMessage (GdbMiType type, Reader reader) throws IOException
     {
-        var token = reader.read();
-        if (token == -1) return null;
-        if (token != '"') throw new RuntimeException("unexpected token");
-
         final var string = readString(reader);
+        int token = string.token;
 
         while (token != -1 && token != '\n') {
             token = reader.read();
         }
 
-        return GdbMiMessage.string(type, string.toString());
+        return GdbMiMessage.string(type, string.value);
     }
 
     static GdbMiMessage.RecordMessage readFinishRecordMessage (GdbMiType type, Reader reader) throws IOException
     {
-        int token = -1;
-
-        final var class_ = readSimpleString(reader);
-        token = class_.token;
-        if (token == -1) return null;
-
-        final Read<Map<String, String>> properties =
-            (token == ',') ? readProperties(reader) : new Read<>(0, Collections.emptyMap());
-        token = properties.token;
+        final var record = readRecord(reader);
+        int token = record.token;
 
         while (token != -1 && token != '\n') {
             token = reader.read();
         }
 
-        return GdbMiMessage.record(type, class_.value, properties.value);
+        return GdbMiMessage.record(type, record.value);
     }
 
     public static GdbMiMessage.StringMessage readFinishPrompt (int token, Reader reader) throws IOException
@@ -114,7 +107,7 @@ public class GdbMiReader
         final var prompt = "(gdb)".toCharArray();
 
         for (int i = 0, j = prompt.length; i != j; ++i) {
-            if (token == -1) throw new RuntimeException("unexpected stream: end-of-stream inside prompt");
+            if (token == -1) throw new RuntimeException("unexpected end-of-stream in prompt");
             if (token != prompt[i]) raiseUnexpected(token, prompt[i]);
             token = reader.read();
         }
@@ -126,9 +119,22 @@ public class GdbMiReader
         return GdbMiMessage.string(GdbMiType.Prompt, "");
     }
 
-    public static Read<Map<String, String>> readProperties (Reader reader) throws IOException
+    public static Read<GdbMiRecord> readRecord (Reader reader) throws IOException
     {
-        final var properties = new HashMap<String, String>();
+        final var type = readSimpleString(reader);
+        int token = type.token;
+        if (token == -1) return null;
+
+        final Read<GdbMiProperties> properties =
+            (token == ',') ? readProperties(reader) : new Read<>(0, new GdbMiProperties());
+        token = properties.token;
+
+        return new Read<>(token, new GdbMiRecord(type.value, properties.value));
+    }
+
+    public static Read<GdbMiProperties> readProperties (Reader reader) throws IOException
+    {
+        final var properties = new HashMap<String, Object>();
 
         int token = -1;
 
@@ -136,18 +142,41 @@ public class GdbMiReader
         {
             final var name = readSimpleString(reader);
             token = name.token;
-            if (token == -1) throw new RuntimeException("unexpected stream: end-of-stream in property-name");
+            if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-name");
 
             if (token != '=') raiseUnexpected(token, '=');
 
-            final var value = readString(reader);
+            final var value = readPropertyValue(reader);
             token = value.token;
 
             properties.put(name.value, value.value);
         }
         while (token == ',');
 
-        return new Read<>(token, properties);
+        return new Read<>(token, new GdbMiProperties(properties));
+    }
+
+    public static Read<Object> readPropertyValue (Reader reader) throws IOException
+    {
+        int token = reader.read();
+        if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-value");
+
+        switch (token)
+        {
+        case '{':
+            final var properties = readProperties(reader);
+            token = properties.token;
+            if (token == -1) throw new RuntimeException("unexpected end-of-stream in property-value");
+            if (token != '}') raiseUnexpected(token, '}');
+            token = reader.read();
+            return new Read<>(token, properties.value);
+        case '"':
+            final var quotedString = readFinishQuotedString(token, reader);
+            return new Read<>(quotedString.token, quotedString.value);
+        default:
+            final var string = readFinishSimpleString(token, reader);
+            return new Read<>(string.token, string.value);
+        }
     }
 
     public static Read<String> readString (Reader reader) throws IOException
@@ -184,14 +213,14 @@ public class GdbMiReader
         final var builder = new StringBuilder();
 
         token = reader.read();
-        if (token == -1) throw new RuntimeException("unexpected stream: end-of-string inside quoted-string");
+        if (token == -1) throw new RuntimeException("unexpected end-of-string in quoted-string");
 
         while (token != '"')
         {
             builder.append((char) token);
             token = reader.read();
             if (token == -1) return new Read<>(token, null);
-            if (token == '\n') throw new RuntimeException("unexpected token: new-line inside quoted-string");
+            if (token == '\n') throw new RuntimeException("unexpected new-line in quoted-string");
         }
 
         token = reader.read();

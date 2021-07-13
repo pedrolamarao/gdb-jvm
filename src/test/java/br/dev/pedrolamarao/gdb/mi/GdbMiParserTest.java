@@ -34,36 +34,47 @@ public class GdbMiParserTest
     }
 
     @Test
-    public void readRecord () throws IOException
+    public void readProperties () throws IOException
     {
-        final var type = GdbMiType.Notify;
-
-        var read =
-            readFinishRecordMessage(type, new StringReader("event,foo=bar,long=\"hello world\",meh=duh"));
+        var reader = new StringReader("foo=bar");
+        var read = GdbMiReader.readProperties(reader);
         assertThat(read, notNullValue());
-        assertThat(read.class_(), equalTo("event"));
-        assertThat(read.properties().size(), equalTo(3));
-        assertThat(read.properties().get("foo"), equalTo("bar"));
-        assertThat(read.properties().get("long"), equalTo("hello world"));
-        assertThat(read.properties().get("meh"), equalTo("duh"));
+        assertThat(read.token, equalTo(-1));
+        assertThat(read.value.get("foo", String.class), equalTo("bar"));
+
+        reader = new StringReader("foo=bar,long=\"hello world\",meh=duh");
+        read = GdbMiReader.readProperties(reader);
+        assertThat(read, notNullValue());
+        assertThat(read.token, equalTo(-1));
+        assertThat(read.value.get("foo", String.class), equalTo("bar"));
+        assertThat(read.value.get("long", String.class), equalTo("hello world"));
+        assertThat(read.value.get("meh", String.class), equalTo("duh"));
+
+        reader = new StringReader("foo=bar,argh={meh=duh,long=\"hello world\"}");
+        read = GdbMiReader.readProperties(reader);
+        assertThat(read, notNullValue());
+        assertThat(read.value.get("foo", String.class), equalTo("bar"));
+        assertThat(
+            read.value.get("argh", GdbMiProperties.class).get("meh", String.class),
+            equalTo("duh")
+        );
+        assertThat(
+            read.value.get("argh", GdbMiProperties.class).get("long", String.class),
+            equalTo("hello world")
+        );
     }
 
     @Test
-    public void readProperties () throws IOException
+    public void readRecord () throws IOException
     {
-        var read = GdbMiReader.readProperties(new StringReader("foo=bar"));
+        final var type = GdbMiType.Notify;
+        var reader = new StringReader("event,foo=bar,long=\"hello world\",meh=duh");
+        var read = readFinishRecordMessage(type, reader);
         assertThat(read, notNullValue());
-        assertThat(read.token, equalTo(-1));
-        assertThat(read.value.size(), equalTo(1));
-        assertThat(read.value.get("foo"), equalTo("bar"));
-
-        read = GdbMiReader.readProperties(new StringReader("foo=bar,long=\"hello world\",meh=duh"));
-        assertThat(read, notNullValue());
-        assertThat(read.token, equalTo(-1));
-        assertThat(read.value.size(), equalTo(3));
-        assertThat(read.value.get("foo"), equalTo("bar"));
-        assertThat(read.value.get("long"), equalTo("hello world"));
-        assertThat(read.value.get("meh"), equalTo("duh"));
+        assertThat(read.content().type(), equalTo("event"));
+        assertThat(read.content().properties().get("foo", String.class), equalTo("bar"));
+        assertThat(read.content().properties().get("long", String.class), equalTo("hello world"));
+        assertThat(read.content().properties().get("meh", String.class), equalTo("duh"));
     }
 
     @Test
@@ -76,6 +87,16 @@ public class GdbMiParserTest
         read = GdbMiReader.readString(new StringReader("\"ab 123-cd\","));
         assertThat(read.value, equalTo("ab 123-cd"));
         assertThat((char) read.token, equalTo(','));
+    }
+
+    @Test
+    public void readStringMessage () throws IOException
+    {
+        var type = GdbMiType.Log;
+        var reader = new StringReader("\"long text message\"\n");
+        var read = GdbMiReader.readFinishStringMessage(type, reader);
+        assertThat(read, notNullValue());
+        assertThat(read.content(), equalTo("long text message"));
     }
 
     static final GdbMiType[] fooList =

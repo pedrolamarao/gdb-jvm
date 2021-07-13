@@ -1,7 +1,8 @@
 package br.dev.pedrolamarao.gdb.mi;
 
-import java.util.Collections;
-import java.util.Map;
+/**
+ * GDB/MI message.
+ */
 
 public abstract class GdbMiMessage
 {
@@ -10,7 +11,17 @@ public abstract class GdbMiMessage
 
     }
 
+    /**
+     * Property: message type.
+     *
+     * @return value
+     */
+
     public abstract GdbMiType type ();
+
+    /**
+     * GDB/MI string message.
+     */
 
     public static final class StringMessage extends GdbMiMessage
     {
@@ -36,32 +47,39 @@ public abstract class GdbMiMessage
         }
     }
 
+    /**
+     * Build string message.
+     *
+     * @param type     message type
+     * @param content  message content
+     * @return         new message
+     */
+
     public static StringMessage string (GdbMiType type, String content)
     {
         return new StringMessage(type, content);
     }
 
+    /**
+     * GDB/MI record message.
+     */
+
     public static final class RecordMessage extends GdbMiMessage
     {
         final GdbMiType type;
 
-        final String class_;
+        final GdbMiRecord content;
 
-        final Map<String, String> properties;
-
-        RecordMessage (GdbMiType type, String class_, Map<String, String> properties)
+        RecordMessage (GdbMiType type, GdbMiRecord content)
         {
             this.type = type;
-            this.class_ = class_;
-            this.properties = properties;
+            this.content = content;
         }
 
-        public String class_ ()
+        public GdbMiRecord content ()
         {
-            return class_;
+            return content;
         }
-
-        public Map<String, String> properties () { return Collections.unmodifiableMap(properties); }
 
         @Override
         public GdbMiType type ()
@@ -70,8 +88,15 @@ public abstract class GdbMiMessage
         }
     }
 
-    public static RecordMessage record (GdbMiType type, String class_, Map<String, String> properties)
+    /**
+     * Build record message.
+     *
+     * @param type     message type
+     * @param content  message content
+     * @return         new message
+     */
+    public static RecordMessage record (GdbMiType type, GdbMiRecord content)
     {
-        return new RecordMessage(type, class_, properties);
+        return new RecordMessage(type, content);
     }
 }

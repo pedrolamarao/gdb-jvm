@@ -1,16 +1,16 @@
 package br.dev.pedrolamarao.gdb.mi;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+/**
+ * GDB/MI record.
+ */
 
 public final class GdbMiRecord
 {
     private final String type;
 
-    private final HashMap<String, String> properties;
+    private final GdbMiProperties properties;
 
-    public GdbMiRecord (String type, HashMap<String, String> properties)
+    public GdbMiRecord (String type, GdbMiProperties properties)
     {
         this.type = type;
         this.properties = properties;
@@ -21,8 +21,5 @@ public final class GdbMiRecord
         return type;
     }
 
-    public Map<String, String> properties ()
-    {
-        return Collections.unmodifiableMap(properties);
-    }
+    public GdbMiProperties properties () { return properties; }
 }

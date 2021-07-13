@@ -1,5 +1,9 @@
 package br.dev.pedrolamarao.gdb.mi;
 
+/**
+ * GDB/MI message type.
+ */
+
 public enum GdbMiType
 {
     Result,
