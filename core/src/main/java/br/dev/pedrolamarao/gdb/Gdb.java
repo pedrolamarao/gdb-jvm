@@ -59,23 +59,192 @@ public class Gdb implements AutoCloseable
         thread.interrupt();
     }
 
-    // operations
+    // commands
+
+    public abstract class GdbCommandBuilder
+    {
+        protected abstract GdbMiWriter writer ();
+
+        GdbCommandBuilder () { }
+
+        public Future<GdbMiMessage.RecordMessage> go () throws IOException
+        {
+            final var context = counter.incrementAndGet();
+            final var future = new CompletableFuture<GdbMiMessage.RecordMessage>();
+            contexts.put(context, future);
+            process.write( writer().context(context) );
+            return future;
+        }
+    }
+
+    public final class GdbBreakInsertBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiBreakInsertWriter writer;
+
+        GdbBreakInsertBuilder (GdbMiWriter.GdbMiBreakInsertWriter writer) { this.writer = writer; }
+
+        public GdbBreakInsertBuilder pending () { writer.pending(); return this; }
+
+        protected GdbMiWriter.GdbMiBreakInsertWriter writer () { return writer; }
+    }
 
     /**
-     * Call GDB command.
+     * Command GDB to break at symbol.
      *
-     * @param command       command message
-     * @return              command response
-     * @throws IOException  if communication failure
+     * @param symbol  symbol to break upon
+     * @return        command builder
+     */
+    public GdbBreakInsertBuilder breakInsertAtSymbol (String symbol)
+    {
+        return new GdbBreakInsertBuilder(GdbMiWriter.breakInsert().symbol(symbol));
+    }
+
+    public final class GdbBreakWatchBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiBreakWatchWriter writer;
+
+        GdbBreakWatchBuilder (GdbMiWriter.GdbMiBreakWatchWriter writer) { this.writer = writer; }
+
+        public GdbBreakWatchBuilder read () { writer.read(); return this; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to watch symbol.
+     *
+     * @param symbol  symbol to watch
+     * @return        command builder
      */
 
-    public Future<GdbMiMessage.RecordMessage> call (GdbMiWriter command) throws IOException
+    public GdbBreakWatchBuilder breakWatch (String symbol)
     {
-        final var context = counter.incrementAndGet();
-        final var future = new CompletableFuture<GdbMiMessage.RecordMessage>();
-        contexts.put(context, future);
-        process.write( command.context(context) );
-        return future;
+        return new GdbBreakWatchBuilder(GdbMiWriter.breakWatch().symbol(symbol));
+    }
+
+    public final class GdbExecContinueBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiExecContinueWriter writer;
+
+        GdbExecContinueBuilder () { writer = GdbMiWriter.execContinue(); }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to continue execution.
+     *
+     * @return  command builder
+     */
+
+    public GdbExecContinueBuilder execContinue ()
+    {
+        return new GdbExecContinueBuilder();
+    }
+
+    public final class GdbExecRunBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiExecRunWriter writer;
+
+        public GdbExecRunBuilder (GdbMiWriter.GdbMiExecRunWriter writer) { this.writer = writer; }
+
+        public GdbExecRunBuilder stopAtMain () { writer.stop(); return this; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to start execution.
+     *
+     * @return  command builder
+     */
+
+    public GdbExecRunBuilder execRun ()
+    {
+        return new GdbExecRunBuilder( GdbMiWriter.execRun() );
+    }
+
+    public final class GdbFileExecAndSymbolsBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter writer;
+
+        GdbFileExecAndSymbolsBuilder (GdbMiWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to load file executable and symbols.
+     *
+     * @param path  file to load
+     * @return      command builder
+     */
+
+    public GdbFileExecAndSymbolsBuilder fileExecAndSymbols (String path)
+    {
+        return new GdbFileExecAndSymbolsBuilder( GdbMiWriter.fileExecAndSymbols().path(path) );
+    }
+
+    public final class GdbExitBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter writer;
+
+        GdbExitBuilder (GdbMiWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to exit.
+     *
+     * @return  command builder
+     */
+
+    public GdbExitBuilder gdbExit ()
+    {
+        return new GdbExitBuilder( GdbMiWriter.gdbExit() );
+    }
+
+    public final class GdbSetBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter writer;
+
+        GdbSetBuilder (GdbMiWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to set variable.
+     *
+     * @param name   variable name
+     * @param value  variable value
+     * @return       command builder
+     */
+
+    public GdbSetBuilder gdbSet (String name, String value)
+    {
+        return new GdbSetBuilder( GdbMiWriter.gdbSet().pair(name, value) );
+    }
+
+    public final class GdbTargetSelectBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiTargetSelectWriter writer;
+
+        public GdbTargetSelectBuilder (GdbMiWriter.GdbMiTargetSelectWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    /**
+     * Command GDB to select executable target.
+     *
+     * @param path  executable target
+     * @return      command builder
+     */
+    public GdbTargetSelectBuilder targetSelectExec (String path)
+    {
+        return new GdbTargetSelectBuilder( GdbMiWriter.targetSelect().exec(path) );
     }
 
     /**

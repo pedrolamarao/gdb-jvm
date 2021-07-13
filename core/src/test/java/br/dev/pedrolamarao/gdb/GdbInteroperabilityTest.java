@@ -2,7 +2,6 @@ package br.dev.pedrolamarao.gdb;
 
 import br.dev.pedrolamarao.gdb.mi.GdbMiMessage;
 import br.dev.pedrolamarao.gdb.mi.GdbMiType;
-import br.dev.pedrolamarao.gdb.mi.GdbMiWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -27,8 +26,8 @@ public class GdbInteroperabilityTest
     {
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message = GdbMiWriter.breakInsert().symbol("main").pending();
-            final var response = gdb.call(message).get(1000, TimeUnit.MILLISECONDS);
+            final var response = gdb.breakInsertAtSymbol("main").pending().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response.content().type(), equalTo("done"));
         }
     }
@@ -40,12 +39,12 @@ public class GdbInteroperabilityTest
 
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message0 = GdbMiWriter.fileExecAndSymbols().path(target);
-            final var response0 = gdb.call(message0).get(1000, TimeUnit.MILLISECONDS);
+            final var response0 = gdb.fileExecAndSymbols(target).go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response0.content().type(), equalTo("done"));
 
-            final var message1 = GdbMiWriter.execRun().stop();
-            final var response1 = gdb.call(message1).get(1000, TimeUnit.MILLISECONDS);
+            final var response1 = gdb.execRun().stopAtMain().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response1.content().type(), equalTo("running"));
 
             final var handler = new GdbHandler() {
@@ -61,12 +60,12 @@ public class GdbInteroperabilityTest
 
             gdb.handle(handler);
 
-            final var message2 = GdbMiWriter.breakWatch().read().symbol("argc");
-            final var response2 = gdb.call(message2).get(1000, TimeUnit.MILLISECONDS);
+            final var response2 = gdb.breakWatch("argc").read().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response2.content().type(), equalTo("done"));
 
-            final var message3 = GdbMiWriter.execContinue();
-            final var response3 = gdb.call(message3).get(1000, TimeUnit.MILLISECONDS);
+            final var response3 = gdb.execContinue().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response3.content().type(), equalTo("running"));
 
             handler.future.get(1000, TimeUnit.MILLISECONDS);
@@ -80,16 +79,16 @@ public class GdbInteroperabilityTest
 
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message0 = GdbMiWriter.fileExecAndSymbols().path(target);
-            final var response0 = gdb.call(message0).get(1000, TimeUnit.MILLISECONDS);
+            final var response0 = gdb.fileExecAndSymbols(target).go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response0.content().type(), equalTo("done"));
 
-            final var message1 = GdbMiWriter.execRun().stop();
-            final var response1 = gdb.call(message1).get(1000, TimeUnit.MILLISECONDS);
+            final var response1 = gdb.execRun().stopAtMain().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response1.content().type(), equalTo("running"));
 
-            final var message2 = GdbMiWriter.execContinue();
-            final var response2 = gdb.call(message2).get(1000, TimeUnit.MILLISECONDS);
+            final var response2 = gdb.execContinue().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response2.content().type(), equalTo("running"));
         }
     }
@@ -101,12 +100,12 @@ public class GdbInteroperabilityTest
 
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message0 = GdbMiWriter.targetSelect().exec(target);
-            final var response0 = gdb.call(message0).get(1000, TimeUnit.MILLISECONDS);
+            final var response0 = gdb.targetSelectExec(target).go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response0.content().type(), equalTo("connected"));
 
-            final var message1 = GdbMiWriter.execRun();
-            final var response1 = gdb.call(message1).get(1000, TimeUnit.MILLISECONDS);
+            final var response1 = gdb.execRun().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response1.content().type(), equalTo("running"));
         }
     }
@@ -116,8 +115,8 @@ public class GdbInteroperabilityTest
     {
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message = GdbMiWriter.fileExecAndSymbols().path(target);
-            final var response = gdb.call(message).get(1000, TimeUnit.MILLISECONDS);
+            final var response = gdb.fileExecAndSymbols(target).go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response.content().type(), equalTo("done"));
         }
     }
@@ -127,8 +126,8 @@ public class GdbInteroperabilityTest
     {
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message = GdbMiWriter.gdbExit();
-            final var response = gdb.call(message).get(1000, TimeUnit.MILLISECONDS);
+            final var response = gdb.gdbExit().go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response.content().type(), equalTo("exit"));
         }
     }
@@ -138,8 +137,8 @@ public class GdbInteroperabilityTest
     {
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message = GdbMiWriter.gdbSet().pair("foo", "16");
-            final var response = gdb.call(message).get(1000, TimeUnit.MILLISECONDS);
+            final var response = gdb.gdbSet("foo", "16").go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response.content().type(), equalTo("done"));
         }
     }
@@ -172,8 +171,8 @@ public class GdbInteroperabilityTest
 
         try (var gdb = Gdb.builder().command(path).start())
         {
-            final var message = GdbMiWriter.targetSelect().exec(target);
-            final var response = gdb.call(message).get(1000, TimeUnit.MILLISECONDS);
+            final var response = gdb.targetSelectExec(target).go()
+                .get(1000, TimeUnit.MILLISECONDS);
             assertThat(response.content().type(), equalTo("connected"));
         }
     }
