@@ -28,7 +28,7 @@ public class GdbProcessInteroperabilityTest
 
         try
         {
-            process.write( GdbMiWriter.quit().context(123) );
+            process.write( GdbMiWriter.gdbExit().context(123) );
 
             assertTimeout(
                 Duration.ofSeconds(10),

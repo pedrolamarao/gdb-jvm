@@ -31,7 +31,7 @@ public class GdbMiInteroperabilityTest
         try
         {
             final var writer = new OutputStreamWriter(process.getOutputStream(), UTF_8);
-            GdbMiWriter.quit().context(123).write(writer).flush();
+            GdbMiWriter.gdbExit().context(123).write(writer).flush();
 
             final var reader = GdbMiReader.fromStream(process.getInputStream(), StandardCharsets.UTF_8);
 

@@ -17,6 +17,7 @@ test.configure
     // properties
     [
         'br.dev.pedrolamarao.gdb.test.command',
+        'br.dev.pedrolamarao.gdb.test.target',
     ]
     .each { p -> if (project.hasProperty(p)) systemProperty(p, project.property(p)) }
 

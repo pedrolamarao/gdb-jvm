@@ -10,6 +10,10 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * GDB process.
+ */
+
 public class GdbProcess
 {
     final Process process;

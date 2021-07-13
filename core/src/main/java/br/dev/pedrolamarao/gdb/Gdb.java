@@ -6,16 +6,20 @@ import br.dev.pedrolamarao.gdb.mi.GdbMiWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * GDB programmatic interface.
+ */
 
 public class Gdb implements AutoCloseable
 {
     private final AtomicInteger counter = new AtomicInteger();
 
-    private final HashMap<Integer, CompletableFuture<GdbMiMessage>> contexts = new HashMap<>();
+    private final ConcurrentHashMap<Integer, CompletableFuture<GdbMiMessage.RecordMessage>> contexts = new ConcurrentHashMap<>();
 
     private final ArrayList<GdbHandler> handlers = new ArrayList<>();
 
@@ -34,10 +38,20 @@ public class Gdb implements AutoCloseable
         thread.start();
     }
 
+    /**
+     * GDB instance builder.
+     *
+     * @return new builder
+     */
+
     public static Builder builder ()
     {
         return new Builder();
     }
+
+    /**
+     * Close GDB instance.
+     */
 
     public void close ()
     {
@@ -47,13 +61,32 @@ public class Gdb implements AutoCloseable
 
     // operations
 
-    public Future<GdbMiMessage> xxxGdbExit () throws IOException
+    /**
+     * Call GDB command.
+     *
+     * @param command       command message
+     * @return              command response
+     * @throws IOException  if communication failure
+     */
+
+    public Future<GdbMiMessage.RecordMessage> call (GdbMiWriter command) throws IOException
     {
         final var context = counter.incrementAndGet();
-        final var future = new CompletableFuture<GdbMiMessage>();
+        final var future = new CompletableFuture<GdbMiMessage.RecordMessage>();
         contexts.put(context, future);
-        process.write( GdbMiWriter.quit().context(context) );
+        process.write( command.context(context) );
         return future;
+    }
+
+    /**
+     * Register GDB event handler.
+     *
+     * @param handler  GDB event handler
+     */
+
+    public void handle (GdbHandler handler)
+    {
+        handlers.add(handler);
     }
 
     // internal
@@ -79,9 +112,10 @@ public class Gdb implements AutoCloseable
                     handlers.forEach(handler -> handler.handle(this, message));
                     break;
                 case Result:
+                    final var record = (GdbMiMessage.RecordMessage) message;
                     final var context = message.context();
                     final var future = contexts.get(context);
-                    future.complete(message);
+                    future.complete(record);
                     contexts.remove(context);
                     break;
                 }
@@ -93,6 +127,10 @@ public class Gdb implements AutoCloseable
         }
     }
 
+    /**
+     * GDB instance builder.
+     */
+
     public static final class Builder
     {
         private final ArrayList<GdbHandler> handlers = new ArrayList<>();
@@ -101,17 +139,38 @@ public class Gdb implements AutoCloseable
 
         Builder () { }
 
+        /**
+         * Property: GDB command path.
+         *
+         * @param value  path
+         * @return       this builder
+         */
+
         public Builder command (String value)
         {
             process.command(value);
             return this;
         }
 
+        /**
+         * Property: GDB async message handler.
+         *
+         * @param handler  handler
+         * @return         this builder
+         */
+
         public Builder handler (GdbHandler handler)
         {
             handlers.add(handler);
             return this;
         }
+
+        /**
+         * Start new GDB instance.
+         *
+         * @return new instance
+         * @throws IOException if file not found etc.
+         */
 
         public Gdb start () throws IOException
         {
