@@ -8,6 +8,8 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +45,8 @@ public class GdbMiInteroperabilityTest
             );
 
             assertTrue( process.waitFor(1000, TimeUnit.MILLISECONDS) );
+
+            assertThat( process.exitValue(), equalTo(0) );
         }
         finally
         {
