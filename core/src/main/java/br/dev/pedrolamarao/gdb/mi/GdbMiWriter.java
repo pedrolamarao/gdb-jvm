@@ -1,5 +1,7 @@
 package br.dev.pedrolamarao.gdb.mi;
 
+import lombok.var;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;

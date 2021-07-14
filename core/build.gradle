@@ -3,10 +3,14 @@ plugins
     id 'java-library'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(11)
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 dependencies
 {
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
+    implementation group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
+
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.7.2')
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'

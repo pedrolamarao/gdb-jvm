@@ -2,6 +2,7 @@ package br.dev.pedrolamarao.gdb;
 
 import br.dev.pedrolamarao.gdb.mi.GdbMiMessage;
 import br.dev.pedrolamarao.gdb.mi.GdbMiWriter;
+import lombok.var;
 
 import java.io.IOException;
 import java.util.ArrayList;

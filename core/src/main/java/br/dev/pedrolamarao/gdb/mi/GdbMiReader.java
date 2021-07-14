@@ -1,5 +1,7 @@
 package br.dev.pedrolamarao.gdb.mi;
 
+import lombok.var;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

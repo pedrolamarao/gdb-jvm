@@ -1,6 +1,7 @@
 package br.dev.pedrolamarao.gdb;
 
 import br.dev.pedrolamarao.gdb.mi.GdbMiWriter;
+import lombok.var;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
