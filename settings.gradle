@@ -12,6 +12,8 @@ dependencyResolutionManagement
     {
         mavenCentral()
     }
+
+    repositoriesMode = RepositoriesMode.PREFER_SETTINGS
 }
 
 include 'core'
