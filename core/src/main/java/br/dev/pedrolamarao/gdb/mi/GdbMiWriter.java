@@ -380,6 +380,14 @@ public abstract class GdbMiWriter
             return this;
         }
 
+        public GdbMiTargetSelectWriter tcp (String host, String port)
+        {
+            Objects.requireNonNull(host);
+            Objects.requireNonNull(port);
+            args = "remote " + host + ':' + port;
+            return this;
+        }
+
         @Override
         public Writer write (Writer writer) throws IOException
         {

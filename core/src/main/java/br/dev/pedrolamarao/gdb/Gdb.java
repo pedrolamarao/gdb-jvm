@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,6 +59,16 @@ public class Gdb implements AutoCloseable
     {
         process.destroyForcibly();
         thread.interrupt();
+    }
+
+    public int exitValue ()
+    {
+        return process.exitValue();
+    }
+
+    public boolean waitFor (long time, TimeUnit unit) throws InterruptedException
+    {
+        return process.waitFor(time, unit);
     }
 
     // commands
@@ -243,9 +254,22 @@ public class Gdb implements AutoCloseable
      * @param path  executable target
      * @return      command builder
      */
+
     public GdbTargetSelectBuilder targetSelectExec (String path)
     {
         return new GdbTargetSelectBuilder( GdbMiWriter.targetSelect().exec(path) );
+    }
+
+    /**
+     * Command GDB to select remote TCP target.
+     *
+     * @param path  executable target
+     * @return      command builder
+     */
+
+    public GdbTargetSelectBuilder targetSelectTcp (String host, String port)
+    {
+        return new GdbTargetSelectBuilder( GdbMiWriter.targetSelect().tcp(host, port) );
     }
 
     /**
