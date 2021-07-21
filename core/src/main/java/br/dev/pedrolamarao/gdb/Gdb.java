@@ -239,6 +239,20 @@ public class Gdb implements AutoCloseable
         return new GdbSetBuilder( GdbMiWriter.gdbSet().pair(name, value) );
     }
 
+    public final class GdbInterpreterExecBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter.GdbMiInterpreterExecWriter writer;
+
+        public GdbInterpreterExecBuilder (GdbMiWriter.GdbMiInterpreterExecWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    public GdbInterpreterExecBuilder interpreterExec (String interpreter, String... command)
+    {
+        return new GdbInterpreterExecBuilder( GdbMiWriter.interpreterExec().interpreter(interpreter).command(command) );
+    }
+
     public final class GdbTargetSelectBuilder extends GdbCommandBuilder
     {
         private final GdbMiWriter.GdbMiTargetSelectWriter writer;
@@ -263,8 +277,9 @@ public class Gdb implements AutoCloseable
     /**
      * Command GDB to select remote TCP target.
      *
-     * @param path  executable target
-     * @return      command builder
+     * @param   host  target host
+     * @param   port  target port
+     * @return        command builder
      */
 
     public GdbTargetSelectBuilder targetSelectTcp (String host, String port)

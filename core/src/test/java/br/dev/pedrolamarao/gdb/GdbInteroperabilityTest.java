@@ -143,6 +143,17 @@ public class GdbInteroperabilityTest
     }
 
     @Test
+    public void interpreterExec () throws Exception
+    {
+        try (var gdb = Gdb.builder().command(path).start())
+        {
+            final var response = gdb.interpreterExec("console", "help").go()
+                .get(1000, TimeUnit.MILLISECONDS);
+            assertThat(response.content().type(), equalTo("done"));
+        }
+    }
+
+    @Test
     public void smoke () throws Exception
     {
         final CompletableFuture<GdbMiMessage> future = new CompletableFuture<>();

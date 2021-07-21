@@ -356,6 +356,71 @@ public abstract class GdbMiWriter
         return new GdbMiGdbSetWriter();
     }
 
+    public static final class GdbMiInterpreterExecWriter extends GdbMiWriter
+    {
+        private String[] command = { };
+
+        private String context = "";
+
+        private String interpreter = "console";
+
+        GdbMiInterpreterExecWriter () { }
+
+        public GdbMiInterpreterExecWriter command (String... value)
+        {
+            this.command = value;
+            return this;
+        }
+
+        @Override
+        public GdbMiInterpreterExecWriter context (int value)
+        {
+            this.context = Integer.toString(value, 10);
+            return this;
+        }
+
+        public GdbMiInterpreterExecWriter interpreter (String value)
+        {
+            this.interpreter = value;
+            return this;
+        }
+
+        @Override
+        public Writer write (Writer writer) throws IOException
+        {
+            Objects.requireNonNull(writer);
+            final var message = String.format("%s-interpreter-exec %s \"%s\"\n", context, interpreter, String.join(" ", command));
+            writer.write(message);
+            return writer;
+        }
+    }
+
+    /**
+     * GDB/MI {@code interpreter-exec} message writer.
+     *
+     * @param   interpreter  interpreter name
+     * @param   command      interpreter command
+     * @return               new message writer
+     */
+
+    public static GdbMiInterpreterExecWriter interpreterExec ()
+    {
+        return new GdbMiInterpreterExecWriter();
+    }
+
+    /**
+     * GDB/MI {@code interpreter-exec} message writer.
+     *
+     * @param   interpreter  interpreter name
+     * @param   command      interpreter command
+     * @return               new message writer
+     */
+
+    public static GdbMiInterpreterExecWriter interpreterExec (String interpreter, String... command)
+    {
+        return new GdbMiInterpreterExecWriter().interpreter(interpreter).command(command);
+    }
+
     /**
      * GDB/MI {@code target-select} message writer.
      */

@@ -42,4 +42,12 @@ public class GdbPluginInteroperabilityTest
         final var result = exec.gdbSet("foo", 16, spec -> {} );
         assertThat(result.content().type(), equalTo("done"));
     }
+
+    @Test
+    public void interpreterExec () throws Exception
+    {
+        final var exec = extension.exec( spec -> spec.getCommand().set(command) );
+        final var result = exec.interpreterExec("console", "help" );
+        assertThat(result.content().type(), equalTo("done"));
+    }
 }
