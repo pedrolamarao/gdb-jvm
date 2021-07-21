@@ -197,6 +197,20 @@ public class Gdb implements AutoCloseable
         return new GdbFileExecAndSymbolsBuilder( GdbMiWriter.fileExecAndSymbols().path(path) );
     }
 
+    public final class GdbFileExecFileBuilder extends GdbCommandBuilder
+    {
+        private final GdbMiWriter writer;
+
+        GdbFileExecFileBuilder (GdbMiWriter writer) { this.writer = writer; }
+
+        protected GdbMiWriter writer () { return writer; }
+    }
+
+    public GdbFileExecAndSymbolsBuilder fileExecFile (String path)
+    {
+        return new GdbFileExecAndSymbolsBuilder( GdbMiWriter.fileExecFile().path(path) );
+    }
+
     public final class GdbExitBuilder extends GdbCommandBuilder
     {
         private final GdbMiWriter writer;

@@ -311,6 +311,43 @@ public abstract class GdbMiWriter
     }
 
     /**
+     * GDB/MI {@code file-exec-file} message writer.
+     */
+
+    public static final class GdbMiFileExecFileWriter extends GdbMiWriter
+    {
+        private String context = "";
+
+        private String path = "";
+
+        GdbMiFileExecFileWriter () {}
+
+        @Override
+        public GdbMiFileExecFileWriter context (int value)
+        {
+            this.context = Integer.toString(value, 10);
+            return this;
+        }
+
+        public GdbMiFileExecFileWriter path (String value)
+        {
+            this.path = value;
+            return this;
+        }
+
+        @Override
+        public Writer write (Writer writer) throws IOException
+        {
+            Objects.requireNonNull(writer);
+            final var message = String.format("%s-file-exec-file %s\n", context, path);
+            writer.write(message);
+            return writer;
+        }
+    }
+
+    public static GdbMiFileExecFileWriter fileExecFile () { return new GdbMiFileExecFileWriter(); }
+
+    /**
      * GDB/MI {@code gdb-set} message writer.
      */
 
@@ -331,7 +368,7 @@ public abstract class GdbMiWriter
         {
             Objects.requireNonNull(name);
             Objects.requireNonNull(value);
-            args = '$' + name + '=' + value;
+            args = name + ' ' + value;
             return this;
         }
 

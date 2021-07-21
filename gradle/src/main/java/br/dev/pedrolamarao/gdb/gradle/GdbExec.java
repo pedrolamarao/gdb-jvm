@@ -110,6 +110,17 @@ public class GdbExec implements AutoCloseable
         return result;
     }
 
+    public GdbMiMessage.RecordMessage fileExecFile ( String path ) throws Exception
+    {
+        final var builder = gdb.fileExecFile(path);
+        final var result = builder.go().get(timeLimit.toMillis(), TimeUnit.MILLISECONDS);
+        if (result.content().type().contentEquals("error")) {
+            final var message = result.content().properties().get("msg", String.class);
+            throw new RuntimeException("gdb: failure: " + message);
+        }
+        return result;
+    }
+
     public GdbMiMessage.RecordMessage gdbExit ( Action<? super Gdb.GdbExitBuilder> configure ) throws Exception
     {
         final var builder = gdb.gdbExit();
