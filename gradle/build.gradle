@@ -9,15 +9,36 @@ gradlePlugin
     {
         minimumGradleVersion = '7.0'
     }
+    plugins
+    {
+        gdb {
+            id = 'br.dev.pedrolamarao.gdb.gradle'
+            implementationClass = 'br.dev.pedrolamarao.gdb.gradle.GdbPlugin'
+        }
+    }
 }
 
 dependencies
 {
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
+    implementation project(':core')
+    implementation group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
+
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '[1.18, 1.19)'
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.7.2')
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testImplementation gradleTestKit()
 }
 
-repositories { mavenCentral() }
+test.configure
+{
+    // properties
+    [
+        'br.dev.pedrolamarao.gdb.test.command',
+        'br.dev.pedrolamarao.gdb.test.target',
+    ]
+    .each { p -> if (project.hasProperty(p)) systemProperty(p, project.property(p)) }
 
-test.configure { useJUnitPlatform() }
+    useJUnitPlatform()
+}
