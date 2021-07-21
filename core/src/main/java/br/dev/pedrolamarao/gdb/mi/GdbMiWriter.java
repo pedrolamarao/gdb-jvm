@@ -486,7 +486,7 @@ public abstract class GdbMiWriter
         {
             Objects.requireNonNull(host);
             Objects.requireNonNull(port);
-            args = "remote " + host + ':' + port;
+            args = "remote tcp:" + host + ':' + port;
             return this;
         }
 
