@@ -61,10 +61,20 @@ public class Gdb implements AutoCloseable
         thread.interrupt();
     }
 
+    /**
+     * Property: GDB instance exit value.
+     *
+     * @return value
+     */
+
     public int exitValue ()
     {
         return process.exitValue();
     }
+
+    /**
+     * Wait for GDB instance to terminate.
+     */
 
     public boolean waitFor (long time, TimeUnit unit) throws InterruptedException
     {
@@ -206,6 +216,10 @@ public class Gdb implements AutoCloseable
         protected GdbMiWriter writer () { return writer; }
     }
 
+    /**
+     * Command GDB to load executable file.
+     */
+
     public GdbFileExecAndSymbolsBuilder fileExecFile (String path)
     {
         return new GdbFileExecAndSymbolsBuilder( GdbMiWriter.fileExecFile().path(path) );
@@ -261,6 +275,10 @@ public class Gdb implements AutoCloseable
 
         protected GdbMiWriter writer () { return writer; }
     }
+
+    /**
+     * Command GDB to use 'interpreter' to execute 'command'.
+     */
 
     public GdbInterpreterExecBuilder interpreterExec (String interpreter, String... command)
     {
