@@ -59,6 +59,11 @@ public abstract class GdbMiMessage
         {
             return type;
         }
+
+        private static final String template = "%s:%d:%s";
+
+        @Override
+        public String toString () { return String.format(template, type, context, content); }
     }
 
     /**
@@ -106,6 +111,11 @@ public abstract class GdbMiMessage
         {
             return type;
         }
+
+        private static final String template = "%s:%d:%s";
+
+        @Override
+        public String toString () { return String.format(template, type, context, content); }
     }
 
     /**

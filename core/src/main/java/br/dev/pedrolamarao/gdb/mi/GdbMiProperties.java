@@ -26,4 +26,7 @@ public class GdbMiProperties
     {
         return type.cast(properties.get(name));
     }
+
+    @Override
+    public String toString () { return properties.toString(); }
 }

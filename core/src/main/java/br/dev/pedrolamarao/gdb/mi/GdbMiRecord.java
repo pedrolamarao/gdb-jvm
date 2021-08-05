@@ -22,4 +22,9 @@ public final class GdbMiRecord
     }
 
     public GdbMiProperties properties () { return properties; }
+
+    private static final String template = "%s:%s";
+
+    @Override
+    public String toString () { return String.format(template, type, properties); }
 }
