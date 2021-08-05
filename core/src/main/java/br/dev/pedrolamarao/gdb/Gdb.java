@@ -355,6 +355,7 @@ public class Gdb implements AutoCloseable
                 case Result:
                     final var record = (GdbMiMessage.RecordMessage) message;
                     final var context = message.context();
+                    if (context == null) break;
                     final var future = contexts.get(context);
                     future.complete(record);
                     contexts.remove(context);
