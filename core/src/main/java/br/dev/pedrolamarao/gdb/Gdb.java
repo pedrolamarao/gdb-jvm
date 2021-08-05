@@ -105,6 +105,8 @@ public class Gdb implements AutoCloseable
 
         GdbBreakInsertBuilder (GdbMiWriter.GdbMiBreakInsertWriter writer) { this.writer = writer; }
 
+        public GdbBreakInsertBuilder hardware () { writer.hardware(); return this; }
+
         public GdbBreakInsertBuilder pending () { writer.pending(); return this; }
 
         protected GdbMiWriter.GdbMiBreakInsertWriter writer () { return writer; }
