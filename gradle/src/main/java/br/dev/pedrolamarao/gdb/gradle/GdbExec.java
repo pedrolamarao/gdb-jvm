@@ -1,7 +1,6 @@
 package br.dev.pedrolamarao.gdb.gradle;
 
 import br.dev.pedrolamarao.gdb.Gdb;
-import br.dev.pedrolamarao.gdb.GdbHandler;
 import br.dev.pedrolamarao.gdb.mi.GdbMiMessage;
 import lombok.var;
 import org.gradle.api.Action;
@@ -69,9 +68,9 @@ public class GdbExec implements AutoCloseable
         return result;
     }
 
-    public void handle (GdbHandler handler)
+    public void handle ( Action<? super GdbMiMessage> handler )
     {
-        gdb.handle(handler);
+        gdb.handle((gdb, message) -> handler.execute(message));
     }
 
     public GdbMiMessage.RecordMessage execContinue ( Action<? super Gdb.GdbExecContinueBuilder> configure ) throws Exception
