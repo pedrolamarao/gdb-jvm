@@ -70,6 +70,7 @@ public abstract class GdbMiMessage
      * Build string message.
      *
      * @param type     message type
+     * @param context  message context
      * @param content  message content
      * @return         new message
      */
@@ -122,6 +123,7 @@ public abstract class GdbMiMessage
      * Build record message.
      *
      * @param type     message type
+     * @param context  message context
      * @param content  message content
      * @return         new message
      */

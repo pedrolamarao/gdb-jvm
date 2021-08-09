@@ -435,8 +435,6 @@ public abstract class GdbMiWriter
     /**
      * GDB/MI {@code interpreter-exec} message writer.
      *
-     * @param   interpreter  interpreter name
-     * @param   command      interpreter command
      * @return               new message writer
      */
 

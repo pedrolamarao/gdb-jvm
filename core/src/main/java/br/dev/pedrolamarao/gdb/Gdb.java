@@ -74,6 +74,11 @@ public class Gdb implements AutoCloseable
 
     /**
      * Wait for GDB instance to terminate.
+     *
+     * @param time  time limit
+     * @param unit  time unit
+     * @return      true if and only if the process terminates before the time limit     *
+     * @throws InterruptedException if the waiting thread is interrupted
      */
 
     public boolean waitFor (long time, TimeUnit unit) throws InterruptedException
@@ -220,6 +225,9 @@ public class Gdb implements AutoCloseable
 
     /**
      * Command GDB to load executable file.
+     *
+     * @param path  file path
+     * @return      command builder
      */
 
     public GdbFileExecAndSymbolsBuilder fileExecFile (String path)
@@ -280,6 +288,10 @@ public class Gdb implements AutoCloseable
 
     /**
      * Command GDB to use 'interpreter' to execute 'command'.
+     *
+     * @param interpreter  command interpreter
+     * @param command      command
+     * @return             command builder
      */
 
     public GdbInterpreterExecBuilder interpreterExec (String interpreter, String... command)
