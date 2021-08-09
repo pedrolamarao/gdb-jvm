@@ -1,6 +1,7 @@
 plugins
 {
     id 'dev.gradleplugins.java-gradle-plugin'
+    id 'maven-publish'
 }
 
 gradlePlugin
@@ -12,7 +13,7 @@ gradlePlugin
     plugins
     {
         gdb {
-            id = 'br.dev.pedrolamarao.gdb.gradle'
+            id = 'br.dev.pedrolamarao.gdb'
             implementationClass = 'br.dev.pedrolamarao.gdb.gradle.GdbPlugin'
         }
     }
