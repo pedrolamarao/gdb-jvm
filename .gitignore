@@ -1,8 +1,8 @@
 # Gradle local cache
-.gradle
+.gradle/
 
 # IDEA local cache
-.idea
+.idea/
 
 # Gradle build output
 **/build/
