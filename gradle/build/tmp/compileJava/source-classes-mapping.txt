@@ -1,8 +1,0 @@
-br/dev/pedrolamarao/gdb/gradle/GdbExecSpec.java
- br.dev.pedrolamarao.gdb.gradle.GdbExecSpec
-br/dev/pedrolamarao/gdb/gradle/GdbPlugin.java
- br.dev.pedrolamarao.gdb.gradle.GdbPlugin
-br/dev/pedrolamarao/gdb/gradle/GdbExec.java
- br.dev.pedrolamarao.gdb.gradle.GdbExec
-br/dev/pedrolamarao/gdb/gradle/GdbExtension.java
- br.dev.pedrolamarao.gdb.gradle.GdbExtension
