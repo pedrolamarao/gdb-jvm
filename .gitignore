@@ -5,7 +5,7 @@
 .idea/
 
 # Gradle build output
-**/build/
+build/
 
 # Gradle build properties
 gradle.properties
