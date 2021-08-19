@@ -8,7 +8,7 @@ gradlePlugin
 {
     compatibility
     {
-        minimumGradleVersion = '7.0'
+        minimumGradleVersion = '6.9'
     }
     plugins
     {
