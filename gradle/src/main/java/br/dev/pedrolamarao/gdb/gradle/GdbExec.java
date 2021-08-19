@@ -1,38 +1,79 @@
 package br.dev.pedrolamarao.gdb.gradle;
 
 import br.dev.pedrolamarao.gdb.Gdb;
+import br.dev.pedrolamarao.gdb.GdbHandler;
 import br.dev.pedrolamarao.gdb.mi.GdbMiMessage;
 import lombok.var;
 import org.gradle.api.Action;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class GdbExec implements AutoCloseable
 {
+    private final Runnable cleaner;
+
     private final Gdb gdb;
 
     private final Duration timeLimit;
 
-    GdbExec (Gdb gdb, Duration timeLimit)
+    GdbExec (Gdb gdb, Duration timeLimit, Runnable cleaner)
     {
+        this.cleaner = cleaner;
         this.gdb = gdb;
         this.timeLimit = timeLimit;
     }
 
+    static class GdbDebugHandler implements GdbHandler
+    {
+        private final Writer writer;
+
+        GdbDebugHandler (Writer writer)
+        {
+            this.writer = writer;
+        }
+
+        @Override
+        public void handle (Gdb gdb, GdbMiMessage message)
+        {
+            try
+            {
+                writer.write( message.toString() );
+                writer.write( '\n' );
+                writer.flush();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static GdbExec fromSpec (GdbExecSpec spec) throws IOException
     {
+        final var closeables = new ArrayList<AutoCloseable>();
         final var builder = Gdb.builder();
         builder.command(spec.getCommand().get());
+        if (spec.getDebugOutput().isPresent()) {
+            final var writer = spec.getDebugOutput().map(OutputStreamWriter::new).get();
+            builder.handler( new GdbDebugHandler(writer) );
+            closeables.add(writer);
+        }
         spec.getHandlers().get().forEach(builder::handler);
         final var gdb = builder.start();
-        return new GdbExec(gdb, spec.getTimeLimit().get());
+        return new GdbExec(gdb, spec.getTimeLimit().get(), () -> closeables.forEach(it -> {
+            try { it.close(); } catch (Exception e) { }
+        }));
     }
 
     public void close ()
     {
         gdb.close();
+        cleaner.run();
     }
 
     public int exitValue () { return gdb.exitValue(); }
